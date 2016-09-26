@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.appindexing.Action;
@@ -25,6 +26,10 @@ import com.squareup.leakcanary.LeakCanary;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import timber.log.Timber;
+
+import static timber.log.Timber.DebugTree;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,13 +45,19 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.imageView2) ImageView imageView;
     @BindView(R.id.nav_view) NavigationView navigationView;
+    @BindView(R.id.textView2) TextView textView2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(toolbar);
-        
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new DebugTree());
+        }
+        Timber.tag("MainActivity");
+        Timber.d("Activity Created");
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
@@ -56,8 +67,8 @@ public class MainActivity extends AppCompatActivity
         Dexter.initialize(this.getApplicationContext());
         ButterKnife.bind(this);//Must be after setContentView
 
-        button.setOnClickListener(view -> Snackbar.make(view, "The buttton was pressed!", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        //button.setOnClickListener(view -> Snackbar.make(view, "The buttton was pressed!", Snackbar.LENGTH_LONG)
+                //.setAction("Action", null).show());
 
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
@@ -76,9 +87,17 @@ public class MainActivity extends AppCompatActivity
         onNewIntent(getIntent());
     }
 
+    @OnClick(R.id.button)
+    public void buttonAction(Button button) {
+        button.setText("Clicked!");
+        button.setEnabled(false);
+        textView2.setText("The button was clicked");
+        Timber.i("The button with id: %s was clicked and the text is now: '%s'.", button.getId(), button.getText());
+    }
+
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -128,7 +147,6 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
